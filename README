@@ -1,2 +1,4 @@
 Snail is a single-threaded, in-memory, barebones MapReduce framework written in Ruby to quickly prototype and test parallel algorithms. It's so called because all its operations are in a single-thread, so it runs really slow for even medium size datasets. However, Snail is intended to help prototype the logic and verify the correctness of a MapReduce algorithm, thus speed/scaling are not the aims.
+You can install it using:
 
+gem install snail-map-reduce

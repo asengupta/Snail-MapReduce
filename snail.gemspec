@@ -1,5 +1,5 @@
 spec = Gem::Specification.new do |s| 
-  s.name = "snail"
+  s.name = "snail-map-reduce"
   s.version = "0.0.1"
   s.author = "Avishek Sen Gupta"
   s.email = "avishek.sen.gupta@gmail.com"
