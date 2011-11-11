@@ -4,12 +4,6 @@ require './matrix_block_mixin'
 require './map_reduce'
 
 class Matrix
-	def each_column
-		self.column_vectors.each {|column_vector| yield(column_vector)}
-	end
-	def each_row
-		self.row_vectors.each {|row_vector| yield(row_vector)}
-	end
 end
 
 def pair_up(key, value)

@@ -14,5 +14,14 @@ class Matrix
 		end
 		Matrix.rows(b)
 	end
+	
+	def each_column
+		self.column_vectors.each {|column_vector| yield(column_vector)}
+	end
+
+	def each_row
+		self.row_vectors.each {|row_vector| yield(row_vector)}
+	end
+
 end
 
