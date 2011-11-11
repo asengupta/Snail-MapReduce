@@ -75,15 +75,6 @@ reductions.times do
 	operations << Reducer.new {|k,v| block_join_reduce(k,v)}
 end
 
-result = []
-mr_time = Benchmark.measure do
-	result = MapReduceRunner.new(operations).run([{:key => "X", :value => {:a => m1, :b => m2}}])
-end
-plain_time = Benchmark.measure do
-	m1*m2
-end
-puts "Unthreaded time = #{plain_time}"
-puts "MR time = #{mr_time}"
-
+result = MapReduceRunner.new(operations).run([{:key => "X", :value => {:a => m1, :b => m2}}])
 puts m1*m2 == result[0][:value][:matrix]
 
