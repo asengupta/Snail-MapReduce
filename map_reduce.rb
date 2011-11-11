@@ -2,7 +2,6 @@ class Partitioner
 	def run(space)
 		partitions = {}
 		space.each do |i|
-			puts i.inspect
 			key = i[:key]
 			partitions[key] = [] if partitions[key].nil?
 			partitions[key] << i[:value]
