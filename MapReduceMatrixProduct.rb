@@ -2,35 +2,33 @@ require 'rubygems'
 require 'statsample'
 require './matrix_block_mixin'
 require './map_reduce'
+require 'benchmark'
 
-class Inputs
-	attr_accessor :inputs
-	def initialize
-		@inputs = []
+def setup(key, value)
+	inputs = []
+	a = value[:a]
+	b = value[:b]
+	if a.row_size == 2
+		inputs << {:key=> key, :a => a, :b => b}
+		return
 	end
+	inputs << {:key => key + "00A", :value => {:a => a.block(0,0), :b => b.block(0,0)}}
+	inputs << {:key => key + "00B", :value => {:a => a.block(0,1), :b => b.block(1,0)}}
 
-	def setup(a,b,key)
-		if a.row_size == 2
-			@inputs << {:key=> key, :a => a, :b => b}
-			return
-		end
-		setup(a.block(0,0), b.block(0,0), key + "00A")
-		setup(a.block(0,1), b.block(1,0), key + "00B")
+	inputs << {:key => key + "01A", :value => {:a => a.block(0,0), :b => b.block(0,1)}}
+	inputs << {:key => key + "01B", :value => {:a => a.block(0,1), :b => b.block(1,1)}}
 
-		setup(a.block(0,0), b.block(0,1), key + "01A")
-		setup(a.block(0,1), b.block(1,1), key + "01B")
+	inputs << {:key => key + "10A", :value => {:a => a.block(1,0), :b => b.block(0,0)}}
+	inputs << {:key => key + "10B", :value => {:a => a.block(1,1), :b => b.block(1,0)}}
 
-		setup(a.block(1,0), b.block(0,0), key + "10A")
-		setup(a.block(1,1), b.block(1,0), key + "10B")
+	inputs << {:key => key + "11A", :value => {:a => a.block(1,0), :b => b.block(0,1)}}
+	inputs << {:key => key + "11B", :value => {:a => a.block(1,1), :b => b.block(1,1)}}
 
-		setup(a.block(1,0), b.block(0,1), key + "11A")
-		setup(a.block(1,1), b.block(1,1), key + "11B")
-	
-	end
+	inputs
 end
 
 def join(left_block, right_block)
-	rows = []
+	rows = []	
 	lower_order = left_block.row_size
 	lower_order.times do |t|
 		rows << left_block.row(t).to_a + right_block.row(t).to_a
@@ -57,20 +55,20 @@ def block_matrix_sum(key, values)
 end
 
 def primitive_map(key, value)
-	{:key => key[0..-2], :value =>  {:matrix => value[:a] * value[:b], :identity => key[0..-2]}}
+	[{:key => key[0..-2], :value =>  {:matrix => value[:a] * value[:b], :identity => key[0..-2]}}]
 end
 
-order = 32
-reductions = (Math.log2(order) - 1).to_i
+order = 64
+mappings = reductions = (Math.log2(order) - 1).to_i
 m1 = m(order)
 m2 = m(order)
 
-inputs = Inputs.new
-inputs.setup(m1,m2,"X")
-space = inputs.inputs
+mappers = []
+mappings.times do
+	mappers << ->(k,v) {setup(k,v)}
+end
 
-
-mappers = [->(k,v) {primitive_map(k,v)}]
+mappers << ->(k,v) {primitive_map(k,v)}
 reducers = []
 
 reductions.times do
@@ -78,8 +76,15 @@ reductions.times do
 	reducers << ->(k,v) {block_join_reduce(k,v)}
 end
 
-result = MapReduceRunner.new(mappers, reducers).run(space)
-puts result
-puts result[0][:value][:matrix]
+result = []
+mr_time = Benchmark.measure do
+	result = MapReduceRunner.new(mappers, reducers).run([{:key => "X", :value => {:a => m1, :b => m2}}])
+end
+plain_time = Benchmark.measure do
+	m1*m2
+end
+puts "Unthreaded time = #{plain_time}"
+puts "MR time = #{mr_time}"
+
 puts m1*m2 == result[0][:value][:matrix]
 

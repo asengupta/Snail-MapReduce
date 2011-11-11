@@ -21,8 +21,12 @@ class Reducer
 end
 
 class Mapper
-	def run(space)
-		space.collect {|i| yield(i[:key], i)}
+	def run(pairs)
+		mapped_pairs = []
+		pairs.each do |pair|
+			mapped_pairs += yield(pair[:key], pair[:value])
+		end
+		mapped_pairs
 	end
 end
 
@@ -32,14 +36,14 @@ class MapReduceRunner
 		@reducers = reducers
 	end
 	
-	def run(space)
+	def run(pairs)
 		results = []
-		@mappers.each {|mapper| results = Mapper.new.run(space) {|k,v| mapper.call(k,v)}}
+		@mappers.each {|mapper| pairs = Mapper.new.run(pairs) {|k,v| mapper.call(k,v)}}
 		@reducers.each do |reducer|
-			partitions = Partitioner.new.run(results)
-			results = Reducer.new.run(partitions) {|k,v| reducer.call(k,v)}
+			partitions = Partitioner.new.run(pairs)
+			pairs = Reducer.new.run(partitions) {|k,v| reducer.call(k,v)}
 		end
-		results
+		pairs
 	end
 end
 
