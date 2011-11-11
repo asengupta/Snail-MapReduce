@@ -63,22 +63,21 @@ mappings = reductions = (Math.log2(order) - 1).to_i
 m1 = m(order)
 m2 = m(order)
 
-mappers = []
+operations = []
 mappings.times do
-	mappers << ->(k,v) {map(k,v)}
+	operations << Mapper.new {|k,v| map(k,v)}
 end
 
-mappers << ->(k,v) {primitive_map(k,v)}
-reducers = []
+operations << Mapper.new {|k,v| primitive_map(k,v)}
 
 reductions.times do
-	reducers << ->(k,v) {block_matrix_sum(k,v)}
-	reducers << ->(k,v) {block_join_reduce(k,v)}
+	operations << Reducer.new {|k,v| block_matrix_sum(k,v)}
+	operations << Reducer.new {|k,v| block_join_reduce(k,v)}
 end
 
 result = []
 mr_time = Benchmark.measure do
-	result = MapReduceRunner.new(mappers, reducers).run([{:key => "X", :value => {:a => m1, :b => m2}}])
+	result = MapReduceRunner.new(operations).run([{:key => "X", :value => {:a => m1, :b => m2}}])
 end
 plain_time = Benchmark.measure do
 	m1*m2

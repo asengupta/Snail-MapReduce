@@ -11,38 +11,42 @@ class Partitioner
 end
 
 class Reducer
-	def run(partitions)
+	def initialize(&block)
+		@function = block
+	end
+
+	def run(pairs)
+		partitions = Partitioner.new.run(pairs)
 		space = []
 		partitions.each_pair do |k,v|
-			space << yield(k,v)
+			space << @function.call(k,v)
 		end
 		space
 	end
 end
 
 class Mapper
+	def initialize(&block)
+		@function = block
+	end
+
 	def run(pairs)
 		mapped_pairs = []
 		pairs.each do |pair|
-			mapped_pairs += yield(pair[:key], pair[:value])
+			mapped_pairs += @function.call(pair[:key], pair[:value])
 		end
 		mapped_pairs
 	end
 end
 
 class MapReduceRunner
-	def initialize(mappers, reducers)
-		@mappers = mappers
-		@reducers = reducers
+	def initialize(operations)
+		@operations = operations
 	end
 	
 	def run(pairs)
 		results = []
-		@mappers.each {|mapper| pairs = Mapper.new.run(pairs) {|k,v| mapper.call(k,v)}}
-		@reducers.each do |reducer|
-			partitions = Partitioner.new.run(pairs)
-			pairs = Reducer.new.run(partitions) {|k,v| reducer.call(k,v)}
-		end
+		@operations.each {|operation| pairs = operation.run(pairs)}
 		pairs
 	end
 end
