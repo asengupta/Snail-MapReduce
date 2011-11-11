@@ -4,7 +4,7 @@ require './matrix_block_mixin'
 require './map_reduce'
 require 'benchmark'
 
-def setup(key, value)
+def map(key, value)
 	inputs = []
 	a = value[:a]
 	b = value[:b]
@@ -65,7 +65,7 @@ m2 = m(order)
 
 mappers = []
 mappings.times do
-	mappers << ->(k,v) {setup(k,v)}
+	mappers << ->(k,v) {map(k,v)}
 end
 
 mappers << ->(k,v) {primitive_map(k,v)}
