@@ -3,9 +3,6 @@ require 'matrix'
 require './matrix_block_mixin'
 require './map_reduce'
 
-class Matrix
-end
-
 def pair_up(key, value)
 	inputs = []
 	a = value[:a]
