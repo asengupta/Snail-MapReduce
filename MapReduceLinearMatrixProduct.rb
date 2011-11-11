@@ -1,8 +1,7 @@
 require 'rubygems'
-require 'statsample'
+require 'matrix'
 require './matrix_block_mixin'
 require './map_reduce'
-require 'benchmark'
 
 class Matrix
 	def each_column
