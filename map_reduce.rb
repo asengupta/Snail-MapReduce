@@ -2,6 +2,7 @@ class Partitioner
 	def run(space)
 		partitions = {}
 		space.each do |i|
+			puts i.inspect
 			key = i[:key]
 			partitions[key] = [] if partitions[key].nil?
 			partitions[key] << i[:value]
@@ -19,7 +20,7 @@ class Reducer
 		partitions = Partitioner.new.run(pairs)
 		space = []
 		partitions.each_pair do |k,v|
-			space << @function.call(k,v)
+			space += @function.call(k,v)
 		end
 		space
 	end

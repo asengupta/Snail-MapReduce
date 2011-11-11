@@ -45,13 +45,13 @@ def block_join_reduce(key, values)
 	p01 = values[values.index {|v| v[:identity] == '01'}][:matrix]
 	p10 = values[values.index {|v| v[:identity] == '10'}][:matrix]
 	p11 = values[values.index {|v| v[:identity] == '11'}][:matrix]
-	{:key => key[0..-2], :value => {:identity => key[-1], :matrix => Matrix.rows(join(p00, p01) + join(p10, p11))}}
+	[{:key => key[0..-2], :value => {:identity => key[-1], :matrix => Matrix.rows(join(p00, p01) + join(p10, p11))}}]
 end
 
 def block_matrix_sum(key, values)
 	sum = Matrix.zero(values.first[:matrix].row_size)
 	values.each {|m| sum += m[:matrix]}
-	{:key => key[0..-3], :value => {:matrix => sum, :identity => key[-2..-1]}}
+	[{:key => key[0..-3], :value => {:matrix => sum, :identity => key[-2..-1]}}]
 end
 
 def primitive_map(key, value)
