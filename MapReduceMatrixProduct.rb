@@ -1,8 +1,6 @@
 require 'rubygems'
-require 'statsample'
 require './matrix_block_mixin'
 require './map_reduce'
-require 'benchmark'
 
 def map(key, value)
 	inputs = []
