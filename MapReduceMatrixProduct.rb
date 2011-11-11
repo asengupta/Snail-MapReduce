@@ -10,7 +10,7 @@ def map(key, value)
 	b = value[:b]
 	if a.row_size == 2
 		inputs << {:key=> key, :a => a, :b => b}
-		return
+		return inputs
 	end
 	inputs << {:key => key + "00A", :value => {:a => a.block(0,0), :b => b.block(0,0)}}
 	inputs << {:key => key + "00B", :value => {:a => a.block(0,1), :b => b.block(1,0)}}
@@ -58,7 +58,7 @@ def primitive_map(key, value)
 	[{:key => key[0..-2], :value =>  {:matrix => value[:a] * value[:b], :identity => key[0..-2]}}]
 end
 
-order = 64
+order = 16
 mappings = reductions = (Math.log2(order) - 1).to_i
 m1 = m(order)
 m2 = m(order)
